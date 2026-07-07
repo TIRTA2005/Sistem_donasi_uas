@@ -21,7 +21,6 @@ try {
         FOREIGN KEY (id_kampanye) REFERENCES kampanye(id_kampanye) ON DELETE CASCADE
     )");
 } catch (PDOException $e) {
-    // abaikan jika tabel sudah ada
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -77,9 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $nama_baru   = 'banner_' . time() . '.' . $ekstensi;
             $target_path = __DIR__ . '/uploads/' . $nama_baru;
 
-            if (move_uploaded_file($tmp_gambar, $target_path)) {
-                $nama_baru = $nama_baru;
-            } else {
+            if (!move_uploaded_file($tmp_gambar, $target_path)) {
                 echo "<script>alert('Gagal mengupload gambar banner baru.');</script>";
             }
         }
