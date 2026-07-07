@@ -2,7 +2,7 @@
 session_start();
 require 'config/koneksi.php';
 require 'core/security.php';
-if (!isset($_SESSION['id_user']) || $_SESSION['role'] !== 'Campaigner') {
+if (!isset($_SESSION['id_user']) || ($_SESSION['role'] !== 'Campaigner' && $_SESSION['role'] !== 'Admin')) {
     header("Location: login.php");
     exit;
 }
