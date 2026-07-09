@@ -12,6 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user = $stmt->fetch();
 
     if ($user && password_verify($password_input, $user['password'])) {
+        session_regenerate_id(true);
         $_SESSION['id_user'] = $user['id_user'];
         $_SESSION['role'] = $user['role'];
         $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
@@ -28,16 +29,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 <!DOCTYPE html>
-<html>
-<head><title>Login</title></head>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DonasiKita</title>
+    <link rel="stylesheet" href="assets/css/auth.css">
+</head>
 <body>
-    <h2>Login Sistem</h2>
-    <form method="POST" action="">
-        <label>Email:</label><br>
-        <input type="email" name="email" required><br><br>
-        <label>Password:</label><br>
-        <input type="password" name="password" required><br><br>
-        <button type="submit">Login</button>
-    </form>
+    <div class="auth-container">
+        <a href="index.php" class="back-home">&larr; Kembali ke Beranda</a>
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2>Selamat Datang</h2>
+                <p>Silakan masuk ke akun Anda</p>
+            </div>
+            
+            <form method="POST" action="">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control" placeholder="Masukkan email Anda" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="Masukkan password Anda" required>
+                </div>
+                
+                <button type="submit" class="btn-auth">Masuk</button>
+            </form>
+            
+            <div class="auth-footer">
+                Belum punya akun? <a href="register.php">Daftar sekarang</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

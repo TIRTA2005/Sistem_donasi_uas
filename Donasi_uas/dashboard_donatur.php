@@ -20,44 +20,7 @@ if (isset($_POST['kirim_donasi'])) {
         $error_msg = "Nominal donasi harus lebih dari 0!";
     } else {
         try {
-            $server_key = "SB-Mid-server-SampleKey123456789";
-            $url = "https://app.sandbox.midtrans.com/snap/v1/transactions";
-
-            $transaction_details = [
-                'order_id'     => $order_id,
-                'gross_amount' => (int)$nominal,
-            ];
-
-            $customer_details = [
-                'first_name' => $_SESSION['nama_lengkap'] ?? 'Donatur',
-            ];
-
-            $params = [
-                'transaction_details' => $transaction_details,
-                'customer_details'    => $customer_details,
-            ];
-
-            $json_payload = json_encode($params);
-
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $json_payload);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'Accept: application/json',
-                'Authorization: Basic ' . base64_encode($server_key . ':')
-            ]);
-
-            $response = curl_exec($ch);
-            curl_close($ch);
-
-            $result = json_decode($response, true);
-
-            if (isset($result['token'])) {
-                $snap_token = $result['token'];
-            }
+            $snap_token = "FAKE-TOKEN-" . bin2hex(random_bytes(4));
 
             $query = "INSERT INTO transaksi (order_id, id_kampanye, id_user, nominal, status_pembayaran, snap_token, created_at) 
                       VALUES (?, ?, ?, ?, 'Pending', ?, NOW())";
@@ -99,7 +62,6 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Donatur - Sistem Donasi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-SampleKey"></script>
 </head>
 <body class="bg-light">
 
@@ -201,35 +163,55 @@ try {
         </div>
     </div>
 
-    <?php if ($snap_token): ?>
+    <!-- Fake Payment Modal -->
+    <div class="modal fade" id="fakePaymentModal" data-bs-backdrop="static" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">💳 Simulasi Pembayaran (Offline)</h5>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <p class="mb-2">Order ID: <strong><?= isset($order_id) ? $order_id : '' ?></strong></p>
+                    <h3 class="text-success mb-4">Rp <?= isset($nominal) ? number_format($nominal, 0, ',', '.') : '0' ?></h3>
+                    <p class="text-muted small mb-4">Ini adalah simulasi pembayaran. Klik tombol di bawah untuk menyelesaikan donasi Anda ke sistem.</p>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-success btn-lg fw-bold" onclick="simulatePayment(true)">✅ Bayar Sekarang</button>
+                        <button type="button" class="btn btn-outline-danger" onclick="simulatePayment(false)">❌ Batalkan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <?php if (isset($snap_token) && !empty($snap_token)): ?>
     <script type="text/javascript">
-        window.snap.pay('<?= $snap_token; ?>', {
-            onSuccess: function(result){
+        document.addEventListener('DOMContentLoaded', function() {
+            var paymentModal = new bootstrap.Modal(document.getElementById('fakePaymentModal'));
+            paymentModal.show();
+        });
+
+        function simulatePayment(isSuccess) {
+            if(isSuccess) {
                 fetch('update_status_ajax.php', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'order_id=' + encodeURIComponent(result.order_id) + '&status=Success'
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'order_id=' + encodeURIComponent('<?= $order_id ?>') + '&status=Success'
                 })
                 .then(response => response.json())
                 .then(data => {
-                    alert("Pembayaran Berhasil!");
-                    window.location.reload();
+                    alert("✅ Pembayaran Simulasi Berhasil!");
+                    window.location.href = 'dashboard_donatur.php';
                 })
                 .catch(error => {
-                    console.error("Error: ", error);
-                    window.location.reload();
+                    alert("Terjadi kesalahan sistem.");
+                    window.location.href = 'dashboard_donatur.php';
                 });
-            },
-            onPending: function(result){
-                alert("Menunggu Pembayaran!");
-                window.location.reload();
-            },
-            onError: function(result){
-                alert("Pembayaran Gagal!");
+            } else {
+                alert("❌ Anda membatalkan proses pembayaran.");
+                window.location.href = 'dashboard_donatur.php';
             }
-        });
+        }
     </script>
     <?php endif; ?>
 

@@ -9,7 +9,6 @@ cek_role('Admin');
 $errors = [];
 $success = '';
 
-// Create kategori
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create') {
     $nama = trim($_POST['nama_kategori'] ?? '');
     if ($nama === '') {
@@ -25,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Update kategori
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update') {
     $id = intval($_POST['id_kategori'] ?? 0);
     $nama = trim($_POST['nama_kategori'] ?? '');
@@ -42,7 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Delete kategori (prevent deletion if used by kampanye)
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $id = intval($_GET['id']);
     if ($id > 0) {
@@ -64,7 +61,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     }
 }
 
-// Fetch categories
 $categories = [];
 try {
     $q = $pdo->query('SELECT * FROM kategori ORDER BY id_kategori DESC');

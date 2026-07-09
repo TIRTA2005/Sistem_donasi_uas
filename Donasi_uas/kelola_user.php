@@ -9,10 +9,8 @@ cek_role('Admin');
 $errors = [];
 $success = '';
 
-// Filter role
 $filter_role = isset($_GET['role']) ? trim($_GET['role']) : '';
 
-// Update user (nama, email, role)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update') {
     $id = intval($_POST['id_user'] ?? 0);
     $nama = trim($_POST['nama_lengkap'] ?? '');
@@ -32,10 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Delete user
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $id = intval($_GET['id']);
-    // Prevent deleting self
     if ($id === ($_SESSION['id_user'] ?? 0)) {
         $errors[] = 'Anda tidak dapat menghapus akun Anda sendiri.';
     } else {
@@ -50,7 +46,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     }
 }
 
-// Build query
 $sql = 'SELECT id_user, nama_lengkap, email, role, created_at FROM users';
 if ($filter_role !== '') {
     $sql .= ' WHERE role = :role';
@@ -70,7 +65,6 @@ try {
     $users = [];
 }
 
-// Available roles (keep in sync with DB enum)
 $available_roles = ['Admin', 'Campaigner', 'Donatur', 'Verifikator'];
 ?>
 <!doctype html>

@@ -28,17 +28,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $deskripsi   = escape_html($_POST['deskripsi']);
         $target_dana = (float) $_POST['target_dana'];
 
+        if ($target_dana <= 0) {
+            echo "<script>alert('Target dana harus lebih besar dari 0.'); window.history.back();</script>";
+            exit;
+        }
+
         if (!is_dir(__DIR__ . '/uploads')) {
             mkdir(__DIR__ . '/uploads', 0755, true);
         }
 
         $nama_gambar = $_FILES['gambar_banner']['name'];
         $tmp_gambar  = $_FILES['gambar_banner']['tmp_name'];
-        $ekstensi    = pathinfo($nama_gambar, PATHINFO_EXTENSION);
+        $ekstensi    = strtolower(pathinfo($nama_gambar, PATHINFO_EXTENSION));
+        $allowed_ext = ['jpg', 'jpeg', 'png', 'webp'];
+        
+        $valid_image = false;
+        if (!empty($tmp_gambar) && in_array($ekstensi, $allowed_ext)) {
+            $image_info = @getimagesize($tmp_gambar);
+            if ($image_info !== false) {
+                $valid_image = true;
+            }
+        }
+
         $nama_baru   = 'banner_' . time() . '.' . $ekstensi;
         $target_path = __DIR__ . '/uploads/' . $nama_baru;
 
-        if (!empty($tmp_gambar) && move_uploaded_file($tmp_gambar, $target_path)) {
+        if ($valid_image && move_uploaded_file($tmp_gambar, $target_path)) {
             $stmt = $pdo->prepare("INSERT INTO kampanye (id_user, id_kategori, judul, deskripsi, target_dana, gambar_banner, status_kampanye) VALUES (?, ?, ?, ?, ?, ?, 'Pending')");
             if ($stmt->execute([$id_user, $id_kategori, $judul, $deskripsi, $target_dana, $nama_baru])) {
                 echo "<script>alert('Kampanye berhasil diajukan! Menunggu verifikasi.'); window.location='dashboard_campaigner.php';</script>";
@@ -57,6 +72,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $deskripsi   = escape_html($_POST['deskripsi']);
         $target_dana = (float) $_POST['target_dana'];
 
+        if ($target_dana <= 0) {
+            echo "<script>alert('Target dana harus lebih besar dari 0.'); window.history.back();</script>";
+            exit;
+        }
+
         $cek = $pdo->prepare("SELECT gambar_banner FROM kampanye WHERE id_kampanye = ? AND id_user = ?");
         $cek->execute([$id_kampanye, $id_user]);
         $kampanye_lama = $cek->fetch();
@@ -70,12 +90,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $nama_gambar = $_FILES['gambar_banner']['name'];
             $tmp_gambar  = $_FILES['gambar_banner']['tmp_name'];
-            $ekstensi    = pathinfo($nama_gambar, PATHINFO_EXTENSION);
-            $nama_baru   = 'banner_' . time() . '.' . $ekstensi;
-            $target_path = __DIR__ . '/uploads/' . $nama_baru;
+            $ekstensi    = strtolower(pathinfo($nama_gambar, PATHINFO_EXTENSION));
+            $allowed_ext = ['jpg', 'jpeg', 'png', 'webp'];
+            
+            $valid_image = false;
+            if (in_array($ekstensi, $allowed_ext)) {
+                $image_info = @getimagesize($tmp_gambar);
+                if ($image_info !== false) {
+                    $valid_image = true;
+                }
+            }
+
+            if (!$valid_image) {
+                echo "<script>alert('Format file tidak valid. Harap unggah gambar (JPG/PNG).'); window.history.back();</script>";
+                exit;
+            }
+
+            $nama_baru_temp   = 'banner_' . time() . '.' . $ekstensi;
+            $target_path = __DIR__ . '/uploads/' . $nama_baru_temp;
 
             if (!move_uploaded_file($tmp_gambar, $target_path)) {
                 echo "<script>alert('Gagal mengupload gambar banner baru.');</script>";
+            } else {
+                $nama_baru = $nama_baru_temp;
             }
         }
 

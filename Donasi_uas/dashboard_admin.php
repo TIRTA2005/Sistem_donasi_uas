@@ -273,19 +273,25 @@ try {
                 </a>
             </li>
             <li>
-                <a href="#">
+                <a href="kelola_kategori.php">
                     <i class="fa-solid fa-tags"></i>
                     <span>Kelola Kategori</span>
                 </a>
             </li>
             <li>
-                <a href="#">
+                <a href="dashboard_campaigner.php">
+                    <i class="fa-solid fa-bullhorn"></i>
+                    <span>Kelola Kampanye</span>
+                </a>
+            </li>
+            <li>
+                <a href="kelola_user.php">
                     <i class="fa-solid fa-users"></i>
                     <span>Kelola User</span>
                 </a>
             </li>
             <li>
-                <a href="#">
+                <a href="dashboard_verifikator.php">
                     <i class="fa-solid fa-hand-holding-dollar"></i>
                     <span>Verifikasi Donasi</span>
                 </a>
